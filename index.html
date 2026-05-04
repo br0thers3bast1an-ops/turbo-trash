@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TURBO TRASH</title>
@@ -7,8 +6,11 @@
 body{background:#000;display:flex;align-items:center;justify-content:center;height:100vh;font-family:monospace;overflow:hidden}
 canvas{display:block}
 #ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-#hud{position:absolute;top:12px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 16px;color:#fff;font-size:12px;gap:4px;flex-wrap:wrap}
+#hud{position:absolute;top:12px;left:0;width:100%;display:flex;justify-content:center;padding:0 16px;color:#fff;font-size:12px;gap:4px;flex-wrap:wrap}
 #hud span{background:rgba(0,0,0,0.6);padding:3px 7px;border-radius:4px;white-space:nowrap}
+#hud-bottom{position:absolute;bottom:62px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 18px;pointer-events:none}
+#hud-spd{color:#ff4;font-size:22px;font-weight:bold;font-family:monospace;background:rgba(0,0,0,0.55);padding:5px 12px;border-radius:6px;letter-spacing:2px;text-shadow:0 0 10px #ff440088}
+#hud-tmr{color:#ff4;font-size:22px;font-weight:bold;font-family:monospace;background:rgba(0,0,0,0.55);padding:5px 12px;border-radius:6px;letter-spacing:2px;text-shadow:0 0 10px #ff440088}
 #ammo-bar{position:absolute;top:40px;left:0;width:100%;display:flex;justify-content:center;gap:5px;padding:0 16px}
 .ammo-icon{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;border:1px solid rgba(255,255,255,0.4)}
 #title-screen,#game-over,#name-entry{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);color:#fff;text-align:center;gap:14px}
@@ -51,10 +53,12 @@ canvas{display:block}
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="hud">
-    <span id="spd">SPEED: 0</span>
     <span id="scr">SCORE: 0</span>
-    <span id="tmr">TIME: 60</span>
     <span id="missileCount">🚀 0</span>
+  </div>
+  <div id="hud-bottom">
+    <div id="hud-spd">SPEED: 0</div>
+    <div id="hud-tmr">TIME: 60</div>
   </div>
   <div id="ammo-bar" style="display:none"></div>
 
@@ -280,7 +284,9 @@ function spawnCars(){
   const colors=['#ff4444','#44aaff','#ffee22','#44ff88','#ff88ff','#ff8822'];
   for(let i=0;i<12;i++){
     const si=20+Math.floor(Math.random()*(NUM_SEG-40));
-    segs[si].cars.push({x:(Math.random()-0.5)*1.2,color:colors[i%colors.length],wobble:(Math.random()-0.5)*0.002,alive:true});
+    // x range -0.75 to +0.75 keeps cars well within the road (road edge ~±1.0)
+    const x=(Math.random()-0.5)*1.5;
+    segs[si].cars.push({x:Math.max(-0.75,Math.min(0.75,x)),color:colors[i%colors.length],wobble:(Math.random()-0.5)*0.002,alive:true});
   }
 }
 
@@ -288,7 +294,7 @@ function spawnBoxes(){
   for(let i=0;i<14;i++){
     const si=10+Math.floor(Math.random()*(NUM_SEG-20));
     const type=Math.random()<0.65?'eth':'btc';
-    segs[si].boxes.push({x:(Math.random()-0.5)*1.2,alive:true,type});
+    segs[si].boxes.push({x:Math.max(-0.75,Math.min(0.75,(Math.random()-0.5)*1.5)),alive:true,type});
   }
 }
 
@@ -363,7 +369,10 @@ function loop(ts){
   const targetBank=turnDir*turnIntensity*0.18;
   bankAngle+=(targetBank-bankAngle)*0.07;
 
-  for(const s of segs) for(const c of s.cars) if(c.alive) c.x+=c.wobble;
+  for(const s of segs) for(const c of s.cars) if(c.alive){
+    c.x+=c.wobble;
+    c.x=Math.max(-0.75,Math.min(0.75,c.x));
+  }
 
   if(activeMissile){
     activeMissile.y-=11;
@@ -377,9 +386,13 @@ function loop(ts){
   for(const e of explosions) e.life-=dt;
 
   draw(startSegIdx,effSpeed);
-  document.getElementById('spd').textContent='SPEED: '+(effSpeed*220|0);
+  const displaySpeed=Math.min(effSpeed*444|0,444);
+  const spdEl=document.getElementById('hud-spd');
+  spdEl.textContent='SPEED: '+displaySpeed;
+  spdEl.style.color=displaySpeed>=440?'#ff2200':'#ff4';
+  spdEl.style.textShadow=displaySpeed>=440?'0 0 14px #ff2200':'0 0 10px #ff440088';
   document.getElementById('scr').textContent='SCORE: '+score;
-  document.getElementById('tmr').textContent='TIME: '+timeLeft;
+  document.getElementById('hud-tmr').textContent='TIME: '+timeLeft;
   requestAnimationFrame(loop);
 }
 
@@ -477,10 +490,10 @@ function draw(startSegIdx){
           activeMissile=null;score+=500;
         }
       }
-      if(sp.segOff<=2&&Math.abs(sp.car.x-playerX)<0.6){speed*=0.55;score=Math.max(0,score-80);}
+      if(sp.segOff===1&&Math.abs(sp.car.x-playerX)<0.38){speed*=0.55;score=Math.max(0,score-80);}
     } else if(sp.type==='coin'){
       drawCoin(sp.x,sp.y,sp.scale,sp.coinType);
-      if(sp.segOff<=2&&Math.abs(sp.box.x-playerX)<0.7){
+      if(sp.segOff<=2&&Math.abs(sp.box.x-playerX)<0.5){
         sp.box.alive=false;
         const gain=sp.coinType==='btc'?3:1;
         missiles+=gain;pickupFlash=0.7;
