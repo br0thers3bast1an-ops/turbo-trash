@@ -8,7 +8,7 @@ canvas{display:block}
 #ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 #hud{position:absolute;top:12px;left:0;width:100%;display:flex;justify-content:center;padding:0 16px;color:#fff;font-size:12px;gap:4px;flex-wrap:wrap}
 #hud span{background:rgba(0,0,0,0.6);padding:3px 7px;border-radius:4px;white-space:nowrap}
-#hud-bottom{position:absolute;bottom:62px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 18px;pointer-events:none}
+#hud-bottom{position:absolute;bottom:130px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 18px;pointer-events:none}
 #hud-spd{color:#ff4;font-size:22px;font-weight:bold;font-family:monospace;background:rgba(0,0,0,0.55);padding:5px 12px;border-radius:6px;letter-spacing:2px;text-shadow:0 0 10px #ff440088}
 #hud-tmr{color:#ff4;font-size:22px;font-weight:bold;font-family:monospace;background:rgba(0,0,0,0.55);padding:5px 12px;border-radius:6px;letter-spacing:2px;text-shadow:0 0 10px #ff440088}
 #ammo-bar{position:absolute;top:40px;left:0;width:100%;display:flex;justify-content:center;gap:5px;padding:0 16px}
@@ -19,11 +19,18 @@ canvas{display:block}
 #game-over h2{font-size:32px;color:#f55;letter-spacing:4px}
 .btn{background:#ff4400;color:#fff;border:none;padding:12px 32px;font-size:15px;font-family:monospace;font-weight:bold;letter-spacing:2px;cursor:pointer;border-radius:4px;pointer-events:all}
 .btn:hover{background:#fff}
-#controls{position:absolute;bottom:10px;left:0;width:100%;display:flex;justify-content:center;gap:10px;pointer-events:all}
-.ctrl-btn{width:58px;height:44px;background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.3);border-radius:8px;color:#fff;font-size:20px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
-.ctrl-btn:active{background:rgba(255,100,200,0.4)}
-#fireBtn{background:rgba(255,80,0,0.35);border-color:rgba(255,150,0,0.6);font-size:13px;font-weight:bold;width:70px}
-#fireBtn:active{background:rgba(255,120,0,0.6)}
+
+/* D-pad controls */
+#controls{position:absolute;bottom:10px;left:0;width:100%;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px;pointer-events:none}
+#dpad{position:relative;width:126px;height:126px;pointer-events:all}
+.dp{position:absolute;width:42px;height:42px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;border-radius:6px}
+.dp:active{background:rgba(255,150,50,0.45);border-color:#ff6600}
+#dp-up   {top:0;   left:42px}
+#dp-left {top:42px;left:0}
+#dp-mid  {top:42px;left:42px;background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);pointer-events:none}
+#dp-right{top:42px;left:84px}
+#fire-btn{width:80px;height:80px;background:rgba(255,60,0,0.4);border:3px solid rgba(255,120,0,0.7);border-radius:50%;color:#fff;font-size:13px;font-weight:bold;font-family:monospace;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:all;margin-bottom:23px;text-shadow:0 0 8px #ff4400;box-shadow:0 0 16px rgba(255,80,0,0.35)}
+#fire-btn:active{background:rgba(255,100,0,0.7);box-shadow:0 0 24px rgba(255,80,0,0.7)}
 
 /* Leaderboard styles */
 #leaderboard{width:280px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,80,0,0.45);border-radius:8px;padding:14px 18px}
@@ -100,11 +107,20 @@ canvas{display:block}
   </div>
 
   <div id="controls">
-    <div class="ctrl-btn" ontouchstart="keys.left=true" ontouchend="keys.left=false" onmousedown="keys.left=true" onmouseup="keys.left=false">&#9664;</div>
-    <div class="ctrl-btn" ontouchstart="keys.up=true" ontouchend="keys.up=false" onmousedown="keys.up=true" onmouseup="keys.up=false">&#9650;</div>
-    <div class="ctrl-btn" ontouchstart="keys.down=true" ontouchend="keys.down=false" onmousedown="keys.down=true" onmouseup="keys.down=false">&#9660;</div>
-    <div class="ctrl-btn" ontouchstart="keys.right=true" ontouchend="keys.right=false" onmousedown="keys.right=true" onmouseup="keys.right=false">&#9654;</div>
-    <div class="ctrl-btn" id="fireBtn" ontouchstart="fireMissile()" onmousedown="fireMissile()">FIRE</div>
+    <div id="dpad">
+      <div class="dp" id="dp-up"
+        ontouchstart="keys.up=true" ontouchend="keys.up=false"
+        onmousedown="keys.up=true" onmouseup="keys.up=false">&#9650;</div>
+      <div class="dp" id="dp-left"
+        ontouchstart="keys.left=true" ontouchend="keys.left=false"
+        onmousedown="keys.left=true" onmouseup="keys.left=false">&#9664;</div>
+      <div class="dp" id="dp-mid">&#9679;</div>
+      <div class="dp" id="dp-right"
+        ontouchstart="keys.right=true" ontouchend="keys.right=false"
+        onmousedown="keys.right=true" onmouseup="keys.right=false">&#9654;</div>
+    </div>
+    <div id="fire-btn"
+      ontouchstart="fireMissile()" onmousedown="fireMissile()">FIRE</div>
   </div>
 </div>
 <script>
@@ -341,9 +357,8 @@ function loop(ts){
   if(lastSecond>=1){timeLeft=Math.max(0,timeLeft-1);lastSecond=0;}
   if(timeLeft<=0){endGame();return;}
 
-  if(keys.up)        speed=Math.min(speed+0.014,1);
-  else if(keys.down) speed=Math.max(speed-0.02,0);
-  else               speed=Math.max(speed-0.008,0);
+  if(keys.up)  speed=Math.min(speed+0.014,1);
+  else         speed=Math.max(speed-0.008,0);
 
   const curSeg=getSeg(Math.floor(pos/5));
   playerX+=(keys.left?-1:keys.right?1:0)*0.035*(0.4+speed*0.6);
